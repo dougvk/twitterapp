@@ -6,6 +6,9 @@ gem 'rails', '3.1.1'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
 gem 'pg'
+gem 'sqlite3'
+gem 'oauth'
+gem 'oauth-plugin', ">= 0.4.0.pre1"
 
 
 # Gems used only for assets and not required
