@@ -7,12 +7,10 @@ gem 'rails', '3.1.1'
 
 gem 'pg'
 gem 'oauth'
-gem 'oauth-plugin', ">= 0.4.0.pre1"
 
 group :development, :test do
     gem 'sqlite3'
 end
-
 
 # Gems used only for assets and not required
 # in production environments by default.
