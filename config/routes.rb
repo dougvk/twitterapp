@@ -1,5 +1,8 @@
 Twitterapp::Application.routes.draw do
-  root :to => "users#home"
+  match '/users/callback', :to => 'users#callback'
+  match '/signout', :to => 'users#signout'
+  resources :users
+  root :to => 'users#home'
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
