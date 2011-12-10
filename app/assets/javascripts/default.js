@@ -6,9 +6,45 @@ $(document).ready(function() {
   var navigation_html = "";
   var current_link = 0;
 
+  $('.button').click(function(event) {
+    event.preventDefault();
+
+    var $query = $('input#query');
+
+    if ($query.val() == '') {
+      $('div#results').html('');
+      return false;
+    }
+
+    request = $.ajax({
+      url: twitter_api + "/search.json",
+      dataType: "jsonp",
+      data: {
+        q: $query.val(),
+      },
+      success: function(data) {
+        var items = [];
+
+        $.each(data.results, function(index, value) {
+          items.push('<li>' + index + ": " + value.from_user + '</li>');
+        });
+
+        $('div#results').html(items.join(''));
+      }
+    });
+
+      $('form').submit(function(event) {
+        event.preventDefault();
+      });
+  });
+
   request = $.ajax({
-    url: twitter_api + "/friends/ids.json?cursor=-1&user_id=" + $('#twitter_id').val(),
+    url: twitter_api + "/friends/ids.json",
     dataType: "jsonp",
+    data: {
+      cursor: "-1",
+      user_id: $('#twitter_id').val()
+    },
     success: function(data) {
       var user_ids = "";
       num_following = data.ids.length;
@@ -31,13 +67,16 @@ $(document).ready(function() {
 
       user_ids = user_ids.substring(0, user_ids.length-1)
       request_2 = $.ajax({
-        url: twitter_api + "/users/lookup.json?user_id=" + user_ids,
+        url: twitter_api + "/users/lookup.json",
         dataType: "jsonp",
+        data: {
+          user_id: user_ids
+        },
         success: function(data) {
           var items = [];
 
           $.each(data, function(index, value) {
-            items.push('<p>' + value.screen_name + '</p>');
+            items.push('<li>' + index + ": " + value.screen_name + '</li>');
           });
 
           $('div#friends').html(items.join('\n'));
