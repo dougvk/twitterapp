@@ -1,3 +1,7 @@
+<input type='hidden' id='twitter_id' value="<%=h @user.twitter_id %>" />
+<input type='hidden' id='show_per_page' />
+<input type='hidden' id='current_page' />
+
 <div id="userdetails">
 <p>
   <b>Twitter ID:</b>
@@ -18,4 +22,10 @@
   <b>Secret:</b>
   <%=h @user.secret %>
 </p>
+</div>
+<div id="ids">
+</div>
+<div id="friends">
+</div>
+<div id="page_navigation">
 </div>

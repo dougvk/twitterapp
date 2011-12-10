@@ -13,7 +13,7 @@ class UsersController < ApplicationController
 
   def callback
     #TODO: check for verification
-    oaw_callback(params[:oauth_verifier], params[:oauth_token])
+    self.oaw_callback(params[:oauth_verifier], params[:oauth_token])
   end
 
   def show
@@ -24,7 +24,7 @@ class UsersController < ApplicationController
   end
 
   def signout
-    oaw_signout
+    self.oaw_signout
     redirect_to root_url
   end
 

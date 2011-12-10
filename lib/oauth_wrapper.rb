@@ -11,13 +11,13 @@ module OauthWrapper
   end
 
   def oaw_callback(verifier, token)
-    access_token = self.client.access_token(session[:request_token], session[:request_token_secret], verifier)
+    self.client.get_access_token(session[:request_token], session[:request_token_secret], verifier)
     credentials = self.client.verify_credentials
 
     @user = User.find_by_screen_name(credentials['screen_name'])
     if @user
-      @user.token = access_token.token
-      @user.secret = access_token.secret
+      @user.token = self.client.access_token.token
+      @user.secret = self.client.access_token.secret
       @user.image_url = credentials['profile_image_url']
     else
       @user = User.new({
