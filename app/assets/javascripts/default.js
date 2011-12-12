@@ -6,36 +6,48 @@ $(document).ready(function() {
   var navigation_html = "";
   var current_link = 0;
 
-  $('.button').click(function(event) {
-    event.preventDefault();
+  $('body').css('padding-top', '40px');
 
-    var $query = $('input#query');
+  $('#search').keypress(function(event) {
+    if (event.which == 13) {
+      event.preventDefault();
 
-    if ($query.val() == '') {
-      $('div#results').html('');
-      return false;
-    }
+      var $query = $('#search');
 
-    request = $.ajax({
-      url: twitter_api + "/search.json",
-      dataType: "jsonp",
-      data: {
-        q: $query.val(),
-      },
-      success: function(data) {
-        var items = [];
-
-        $.each(data.results, function(index, value) {
-          items.push('<li>' + index + ": " + value.from_user + '</li>');
-        });
-
-        $('div#results').html(items.join(''));
+      if ($query.val() == '') {
+        return false;
       }
-    });
 
-      $('form').submit(function(event) {
-        event.preventDefault();
+      request = $.ajax({
+        url: twitter_api + "/search.json",
+        dataType: "jsonp",
+        data: {
+          q: $query.val(),
+        },
+        success: function(data) {
+          var items = [];
+
+          $.each(data.results, function(index, value) {
+            items.push('<tr><td><span class="label notice">@' + value.from_user + '</span></td><td><button id="srchbtn' + index + '" class="follow btn search danger">&cross; Not Following</button></td></tr>');
+          });
+
+          $('#results').html(items.join(''));
+          $('.search').click(function(event) {
+            id = $(this).attr('id');
+            type = $(this).attr('class');
+            if (type === "follow btn search success") {
+              unfollow(id);
+            } else {
+              follow(id);
+            }
+          });
+        }
       });
+
+        $('form').submit(function(event) {
+          event.preventDefault();
+        });
+    }
   });
 
   request = $.ajax({
@@ -51,15 +63,20 @@ $(document).ready(function() {
       num_pages = Math.ceil(num_following/show_per_page);
       $('#current_page').val(0);
       $('#show_per_page').val(show_per_page);
+      $('#num_pages').val(num_pages);
 
-      navigation_html = '<a class="previous_link" href="javascript:previous();">Previous Page</a>';
+      navigation_html = '<li class="prev disabled"><a href="javascript:previous();">&larr; Previous</a></li>';
       while (num_pages > current_link) {
-        navigation_html += '<a class="page_link" href="javascript:go_to_page(' + current_link +')" longdesc="' + current_link +'">'+ (current_link + 1) +'</a>';
+        navigation_html += '<li id="page' + current_link + '"><a href="javascript:go_to_page(' + current_link +');">'+ (current_link + 1) +'</a></li>';
+        $('#page'+current_link).click(function() {
+          $('.pagination ul li.active').removeClass('active');
+          $(this).parent().addClass('active');
+        });
         current_link++
       }
-      navigation_html += '<a class="next_link" href="javascript:next();">Next Page</a>';
-      $('#page_navigation').html(navigation_html);
-      $('#page_navigation .page_link:first').addClass('active_page');
+      navigation_html += '<li class="next"><a href="javascript:next();">Next &rarr;</a></li>';
+      $('.pagination ul').append(navigation_html);
+      $('.pagination ul li:first').next().addClass('active');
 
       $.each(data.ids, function(index, val) {
         user_ids += val + ",";
@@ -76,12 +93,21 @@ $(document).ready(function() {
           var items = [];
 
           $.each(data, function(index, value) {
-            items.push('<li>' + index + ": " + value.screen_name + '</li>');
+            items.push('<tr><td><span class="label notice">@' + value.screen_name + '</span></td><td><button id="btn' + index + '" class="follow btn success">&check; Following</button></td></tr>');
           });
 
-          $('div#friends').html(items.join('\n'));
-          $('div#friends').children().css('display', 'none');
-          $('div#friends').children().slice(0,show_per_page).css('display', 'block');
+          $('#friends').html(items.join(''));
+          $('.follow').click(function(event) {
+            id = $(this).attr('id');
+            type = $(this).attr('class');
+            if (type === "follow btn success") {
+              unfollow(id);
+            } else {
+              follow(id);
+            }
+          });
+          $('.follow').parent().parent().hide();
+          $('.follow').parent().parent().slice(0,show_per_page).show();
         }
       });
     }
@@ -89,25 +115,63 @@ $(document).ready(function() {
 });
 
 function go_to_page(page_num) {
+  console.log("calling gotopage");
   var show_per_page = parseInt($('#show_per_page').val());
+  var num_pages = parseInt($('#num_pages').val());
   start_from = page_num * show_per_page;
   end_on = start_from + show_per_page;
 
-  $('div#friends').children().css('display', 'none').slice(start_from, end_on).css('display', 'block');
-  $('.page_link[longdesc=' + page_num +']').addClass('active_page').siblings('.active_page').removeClass('active_page');
+  $('.pagination ul li.active').removeClass('active');
+  $('#page'+page_num).addClass('active');
+
+  $('.follow').parent().parent().hide();
+  $('.follow').parent().parent().slice(start_from, end_on).show();
+  $('.search').parent().parent().show();
   $('#current_page').val(page_num);
+
+  if (page_num > 0) {
+    $('.pagination ul li:first').removeClass('prev disabled');
+    $('.pagination ul li:first').addClass('prev');
+  }
+
+  if (page_num == 0)
+    $('.pagination ul li:first').addClass('prev disabled');
+
+  if (page_num+1 < num_pages) {
+    $('.pagination ul li:last').removeClass('next disabled');
+    $('.pagination ul li:last').addClass('next');
+  }
+
+  if (page_num+1 === num_pages)
+    $('.pagination ul li:last').addClass('next disabled');
 }
 
 function previous() {
+  console.log("calling previous");
   new_page = parseInt($('#current_page').val()) - 1;
-  if($('.active_page').prev('.page_link').length==true) {
+  if($('.pagination ul li.active').prev().children().text().length === 1) {
     go_to_page(new_page);
   }
 }
 
 function next() {
+  console.log("calling next");
   new_page = parseInt($('#current_page').val()) + 1;
-  if($('.active_page').next('.page_link').length==true) {
+  if($('.pagination ul li.active').next().children().text().length === 1) {
     go_to_page(new_page);
   }
+}
+
+function unfollow(id){
+  console.log("unfollow " + id);
+  $('#' + id).removeClass("success");
+  $('#' + id).addClass("danger");
+  $('#' + id).html("&cross; Not Following");
+}
+
+function follow(id) {
+  console.log("follow " + id)
+  $('#' + id).removeClass("danger");
+  $('#' + id).addClass("success");
+  $('#' + id).html("&check; Following");
 }

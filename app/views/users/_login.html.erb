@@ -1,14 +1,26 @@
-<div id="currentuser">
+<div class="topbar">
+  <div class="fill">
+    <div class="container">
+      <a class="brand" href="#">Twitter Challenge</a>
+      <ul class="nav">
+        <li><%= link_to "Home", root_path %></li>
+      </ul>
+      <form class="pull-left" action>
+        <input type="text" id="search" placeholder="Search">
+      </form>
+      <p class="pull-right">
+        <% if logged_in? %>
 
-<% if logged_in? %>
+        Logged in as <%= link_to current_user.screen_name, user_path(current_user)  %>.&nbsp;
 
-You are logged in as <%= link_to current_user.screen_name, user_path(current_user)  %>. 
+        <%= link_to 'Sign Out', signout_path  %>.
 
-<%= link_to 'sign-out', signout_path  %>.
+        <% else %>
 
-<% else %>
+          <%= link_to  "Sign in", new_user_path  %>
 
-<%= link_to  image_tag('signin.png'), new_user_path  %>
-
-<% end %>
+        <% end %>
+      </p>
+    </div>
+  </div>
 </div>
