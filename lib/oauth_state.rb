@@ -50,7 +50,6 @@ class OauthState
   # @params: path, the api call to make
   # calls the version 1 api with GET
   def get(path)
-    Rails.logger.error "Getting #{path}"
     response = self.access_token.get("/1#{path}")
     return ActiveSupport::JSON.decode(response.body)
   end
@@ -58,7 +57,6 @@ class OauthState
   # @params: path, the api call to make
   # calls the version 1 api with POST
   def post(path)
-    Rails.logger.error "Posting #{path}"
     response = self.access_token.post("/1#{path}")
     return ActiveSupport::JSON.decode(response.body)
   end
@@ -66,7 +64,6 @@ class OauthState
   # API call for verify credentials
   def verify_credentials
     response = get('/account/verify_credentials.json')
-    Rails.logger.error response
     return response
   end
 
@@ -74,7 +71,6 @@ class OauthState
   def mass_follow(follow_list)
     follow_list.each do |to_follow|
       path = "/friendships/create.json?screen_name=#{to_follow}"
-      Rails.logger.error post(path)
     end
   end
 
@@ -82,7 +78,6 @@ class OauthState
   def mass_unfollow(unfollow_list)
     unfollow_list.each do |to_unfollow|
       path = "/friendships/destroy.json?screen_name=#{to_unfollow}"
-      Rails.logger.error post(path)
     end
   end
 end
