@@ -88,7 +88,7 @@ module OauthWrapper
   end
 
 
-  # <--- typical getter/setter and state functions --->
+  # <--- vanilla getter/setter functions --->
 
 
 

@@ -50,9 +50,10 @@ class UsersController < ApplicationController
     begin
       @user = User.find_by_screen_name(params[:id])
       if not @user
-        Rails.logger.error "User not found"
+        raise "User not found"
       end
-    rescue
+    rescue Exception => e
+      Rails.logger.error e.message
       redirect_to root_path
       return false
     end
