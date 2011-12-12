@@ -3,7 +3,7 @@ class UsersController < ApplicationController
 
   # apply these functions before every function call (except in the list)
   before_filter :require_oauth, :except => [:callback, :signout, :home, :submit]
-  before_filter :instantiate_user, :except => [:callback, :signout, :home]
+  before_filter :instantiate_user, :except => [:callback, :signout, :home, :submit]
   before_filter :access_privileges, :except => [:callback, :signout, :home, :submit]
 
   # just renders the homepage

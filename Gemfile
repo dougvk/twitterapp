@@ -7,6 +7,7 @@ gem 'rails', '3.1.1'
 
 gem 'pg'
 gem 'oauth'
+gem 'thin'
 
 group :development, :test do
     gem 'sqlite3'
