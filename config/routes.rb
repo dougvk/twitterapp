@@ -1,4 +1,5 @@
 Twitterapp::Application.routes.draw do
+  match '/users/submit', :to => 'users#submit'
   match '/users/callback', :to => 'users#callback'
   match '/signout', :to => 'users#signout'
   resources :users

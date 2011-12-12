@@ -6,9 +6,11 @@
   <%= javascript_include_tag "application" %>
   <%= stylesheet_link_tag "application" %>
 </head>
-<body padding-top="40px">
+
+<%#<--- topbar navigation panel --->%>
 <%= render "users/login" %>
 
+<%#<--- body --->%>
 <%= yield %>
 
 

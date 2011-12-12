@@ -10,15 +10,10 @@
       </form>
       <p class="pull-right">
         <% if logged_in? %>
-
-        Logged in as <%= link_to current_user.screen_name, user_path(current_user)  %>.&nbsp;
-
-        <%= link_to 'Sign Out', signout_path  %>.
-
+          Logged in as <%= link_to current_user.screen_name, user_path(current_user)  %>.&nbsp;
+          <%= link_to 'Sign Out', signout_path  %>.
         <% else %>
-
           <%= link_to  "Sign in", new_user_path  %>
-
         <% end %>
       </p>
     </div>
