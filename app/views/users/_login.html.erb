@@ -10,8 +10,8 @@
       </form>
       <p class="pull-right">
         <% if logged_in? %>
-          Logged in as <%= link_to current_user.screen_name, user_path(current_user)  %>.&nbsp;
-          <%= link_to 'Sign Out', signout_path  %>.
+          <%= image_tag current_user.image_url, {:size => "16x16"} %> <%= link_to current_user.screen_name, user_path(current_user)  %>
+          <%= link_to '| Sign Out', signout_path  %>.
         <% else %>
           <%= link_to  "Sign in", new_user_path  %>
         <% end %>

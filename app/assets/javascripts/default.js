@@ -1,29 +1,3 @@
-function create_button(index, username, id, classname, text) {
-  actual_id = "" + id + index;
-  button = '<tr><td><span id="' + actual_id + '" class="label notice">@' + username + '</span></td><td><button id="' + actual_id + '" class="' + classname + '">' + text + '</button></td></tr>';
-  return button;
-}
-
-function get_unfollowers()
-{
-  unfollow = [];
-  $('.follow.danger').each(function() {
-    id = $(this).attr('id');
-    unfollow.push($('.label.notice#'+id).text().substring(1));
-  });
-  return unfollow.join(',');
-}
-
-function get_followers()
-{
-  follow = [];
-  $('.search.success').each(function() {
-    id = $(this).attr('id');
-    follow.push($('.label.notice#'+id).text().substring(1));
-  });
-  return follow.join(',');
-}
-
 $(document).ready(function() {
   var twitter_api = "http://api.twitter.com/1";
   var num_following = 0;
@@ -32,12 +6,18 @@ $(document).ready(function() {
   var navigation_html = "";
   var current_link = 0;
 
+  // hide and pad proper elements
   $('body').css('padding-top', '40px');
+  $('.loading').hide();
+
+  // if save is clicked, show loading gif and refresh upon ajax success
   $('#save').click(function(event) {
-    unfollow = get_unfollowers()
-    console.log("unfollow: " + unfollow);
-    follow = get_followers()
-    console.log("follow: " + follow);
+    unfollow = get_unfollowers();
+    follow = get_followers();
+
+    $('.span9').hide();
+    $('.span7').hide();
+    $('.loading').show();
 
     request = $.ajax({
       url: "/users/submit",
@@ -51,17 +31,19 @@ $(document).ready(function() {
     });
   });
 
+  // if user hits enter, start ajax call to api
   $('#search').keypress(function(event) {
-    if (event.which == 13) {
+    if (event.which === 13) {
       event.preventDefault();
 
       var $query = $('#search');
 
-      if ($query.val() == '') {
+      if ($query.val() === '') {
         return false;
       }
 
-      request = $.ajax({
+      // call search with URL encoded query parameter from form
+      $.ajax({
         url: twitter_api + "/search.json",
         dataType: "jsonp",
         data: {
@@ -70,10 +52,10 @@ $(document).ready(function() {
         success: function(data) {
           var items = [];
 
+          // create a follow/unfollow button for each result
           $.each(data.results, function(index, value) {
             button = create_button(index, value.from_user, "srchbtn", "search btn danger", "&cross; Not Following");
             items.push(button);
-            //items.push('<tr><td><span id="srchbtn' + index + '" class="label notice">@' + value.from_user + '</span></td><td><button id="srchbtn' + index + '" class="follow btn search danger">&cross; Not Following</button></td></tr>');
           });
 
           $('#results').html(items.join(''));
@@ -96,9 +78,7 @@ $(document).ready(function() {
   });
 
   // call this ajax request on page load to get followed users from API
-  request = $.ajax({
-
-    // builds the url
+  $.ajax({
     url: twitter_api + "/friends/ids.json",
     dataType: "jsonp",
     data: {
@@ -151,7 +131,6 @@ $(document).ready(function() {
           $.each(data, function(index, value) {
             button = create_button(index, value.screen_name, "btn", "follow btn success", "&check; Following");
             items.push(button);
-            //items.push('<tr><td><span id="btn' + index + '" class="label notice">@' + value.screen_name + '</span></td><td><button id="btn' + index + '" class="follow btn success">&check; Following</button></td></tr>');
           });
 
           // add to list and create click handlers for follow/unfollow actions
@@ -243,4 +222,30 @@ function follow(id) {
   $('.btn#' + id).removeClass("danger");
   $('.btn#' + id).addClass("success");
   $('.btn#' + id).html("&check; Following");
+}
+
+function create_button(index, username, id, classname, text) {
+  actual_id = "" + id + index;
+  button = '<tr><td><span id="' + actual_id + '" class="label notice">@' + username + '</span></td><td><button id="' + actual_id + '" class="' + classname + '">' + text + '</button></td></tr>';
+  return button;
+}
+
+function get_unfollowers()
+{
+  unfollow = [];
+  $('.follow.danger').each(function() {
+    id = $(this).attr('id');
+    unfollow.push($('.label.notice#'+id).text().substring(1));
+  });
+  return unfollow.join(',');
+}
+
+function get_followers()
+{
+  follow = [];
+  $('.search.success').each(function() {
+    id = $(this).attr('id');
+    follow.push($('.label.notice#'+id).text().substring(1));
+  });
+  return follow.join(',');
 }
