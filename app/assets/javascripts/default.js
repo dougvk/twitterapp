@@ -51,15 +51,15 @@ $(document).ready(function() {
           q: $query.val(),
         },
         success: function(data) {
-          var items = [];
+          var results = [];
 
           // create a follow/unfollow button for each result
           $.each(data.results, function(index, value) {
-            button = create_button(index, value.from_user, "srchbtn", "search btn danger", "&cross; Not Following");
-            items.push(button);
+            button = create_search_button(index, value.from_user, "srchbtn", "search btn danger", "&cross; Not Following");
+            results.push(button);
           });
 
-          $('#results').html(items.join(''));
+          $('#results').html(results.join(''));
           $('.search').click(function(event) {
             id = $(this).attr('id');
             type = $(this).attr('class');
@@ -236,6 +236,12 @@ function create_button(index, username, id, classname, text) {
   button = '<tr><td><span id="' + actual_id + '" class="label notice">@' + username + '</span></td><td><button id="' + actual_id + '" class="' + classname + '">' + text + '</button></td></tr>';
   items.push(button);
   $('#friends').append(button);
+  return button;
+}
+
+function create_search_button(index, username, id, classname, text) {
+  actual_id = "" + id + index;
+  button = '<tr><td><span id="' + actual_id + '" class="label notice">@' + username + '</span></td><td><button id="' + actual_id + '" class="' + classname + '">' + text + '</button></td></tr>';
   return button;
 }
 
