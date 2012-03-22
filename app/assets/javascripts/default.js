@@ -5,7 +5,7 @@ $(document).ready(function() {
   var num_pages = 0;
   var navigation_html = "";
   var current_link = 0;
-  var items = [];
+  var _selectIndex = 0;
 
   // hide and pad proper elements
   $('body').css('padding-top', '40px');
@@ -15,17 +15,17 @@ $(document).ready(function() {
   $('#save').click(function(event) {
     unfollow = get_unfollowers();
     follow = get_followers();
+      console.log("unfollowing these: " + unfollow);
 
     $('.span9').hide();
     $('.span7').hide();
     $('.loading').show();
 
     request = $.ajax({
-      url: "/users/submit",
-      data: {
-        unfollow: unfollow,
-        follow: follow
-      },
+      url: twitter_api + "/friendships/destroy.json",
+      dataType: "jsonp",
+      type: "POST",
+      data: "{ \"screen_name\": \"dougvk\" }",
       success: function(data) {
         location.reload(true);
       }
@@ -51,14 +51,15 @@ $(document).ready(function() {
           q: $query.val(),
         },
         success: function(data) {
-          var results = [];
+          var results = new Array();
 
           // create a follow/unfollow button for each result
           $.each(data.results, function(index, value) {
-            button = create_search_button(index, value.from_user, "srchbtn", "search btn danger", "&cross; Not Following");
+            button = create_button(index, value.from_user, "srchbtn", "search btn danger", "&cross; Not Following");
             results.push(button);
           });
 
+          // add follow/unfollow click events
           $('#results').html(results.join(''));
           $('.search').click(function(event) {
             id = $(this).attr('id');
@@ -119,10 +120,13 @@ $(document).ready(function() {
       });
 
 
-      user_ids = user_ids.substring(0, user_ids.length-1);
-      var i, j, temparray, chunk = 50;
+      // since API will only take requests of 100 users at a time, chunk api calls every 100 users
+      ids = user_ids.substring(0, user_ids.length-1);
+      user_ids = ids.split(',');
+      var i, j, temparray, chunk = 100;
       for (i = 0, j = user_ids.length; i < j; i+=chunk) {
-          temparray = array.slice(i, i+chunk);
+          temparray = user_ids.slice(i, i+chunk);
+          temparray = temparray.join(',');
           console.log("Temp array: " + temparray);
           request_2 = $.ajax({
             url: twitter_api + "/users/lookup.json",
@@ -131,27 +135,29 @@ $(document).ready(function() {
               user_id: temparray
             },
             success: function(data) {
-
+              
               // create the follow/unfollow buttons for the returned users
               $.each(data, function(index, value) {
-                button = create_button(index, value.screen_name, "btn", "follow btn success", "&check; Following");
+                button = create_button(_selectIndex++, value.screen_name, "btn", "follow btn success", "&check; Following");
+                $('#friends').append(button);
                 console.log("Creating button: " + button);
               });
 
-              // create click handlers for follow/unfollow actions
-              $('.follow').click(function(event) {
-                id = $(this).attr('id');
-                type = $(this).attr('class');
-                if (type === "follow btn success") {
-                  unfollow(id);
-                } else {
-                  follow(id);
-                }
-              });
-
-              // show only the first 20
+              // show only the first show_per_page
               $('.follow').parent().parent().hide();
-              if (items.length == num_following) {
+              if ($('.follow').parent().parent().length == num_following) {
+
+                  // create click handlers for follow/unfollow actions
+                  $('.follow').click(function(event) {
+                    id = $(this).attr('id');
+                    type = $(this).attr('class');
+                    if (type === "follow btn success") {
+                      unfollow(id);
+                    } else {
+                      follow(id);
+                    }
+                  });
+
                   $('.follow').parent().parent().slice(0,show_per_page).show();
               }
             }
@@ -201,7 +207,7 @@ function go_to_page(page_num) {
 function previous() {
   console.log("calling previous");
   new_page = parseInt($('#current_page').val()) - 1;
-  if($('.pagination ul li.active').prev().children().text().length === 1) {
+  if($('.pagination ul li.active').prev().children().text() !== "← Previous") {
     go_to_page(new_page);
   }
 }
@@ -210,7 +216,7 @@ function previous() {
 function next() {
   console.log("calling next");
   new_page = parseInt($('#current_page').val()) + 1;
-  if($('.pagination ul li.active').next().children().text().length === 1) {
+  if($('.pagination ul li.active').next().children().text() !== "Next →") {
     go_to_page(new_page);
   }
 }
@@ -232,15 +238,8 @@ function follow(id) {
 }
 
 function create_button(index, username, id, classname, text) {
-  actual_id = "" + id + items.length;
-  button = '<tr><td><span id="' + actual_id + '" class="label notice">@' + username + '</span></td><td><button id="' + actual_id + '" class="' + classname + '">' + text + '</button></td></tr>';
-  items.push(button);
-  $('#friends').append(button);
-  return button;
-}
-
-function create_search_button(index, username, id, classname, text) {
   actual_id = "" + id + index;
+  //console.log(actual_id);
   button = '<tr><td><span id="' + actual_id + '" class="label notice">@' + username + '</span></td><td><button id="' + actual_id + '" class="' + classname + '">' + text + '</button></td></tr>';
   return button;
 }
@@ -250,6 +249,7 @@ function get_unfollowers()
   unfollow = [];
   $('.follow.danger').each(function() {
     id = $(this).attr('id');
+    console.log($('.label.notice#'+id).text().substring(1));
     unfollow.push($('.label.notice#'+id).text().substring(1));
   });
   return unfollow.join(',');
@@ -260,6 +260,7 @@ function get_followers()
   follow = [];
   $('.search.success').each(function() {
     id = $(this).attr('id');
+    console.log($('.label.notice#'+id).text().substring(1));
     follow.push($('.label.notice#'+id).text().substring(1));
   });
   return follow.join(',');
