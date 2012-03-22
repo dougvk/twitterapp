@@ -5,6 +5,7 @@ $(document).ready(function() {
   var num_pages = 0;
   var navigation_html = "";
   var current_link = 0;
+  var items = [];
 
   // hide and pad proper elements
   $('body').css('padding-top', '40px');
@@ -117,39 +118,45 @@ $(document).ready(function() {
         user_ids += val + ",";
       });
 
-      user_ids = user_ids.substring(0, user_ids.length-1)
-      request_2 = $.ajax({
-        url: twitter_api + "/users/lookup.json",
-        dataType: "jsonp",
-        data: {
-          user_id: user_ids
-        },
-        success: function(data) {
-          var items = [];
 
-          // create the follow/unfollow buttons for the returned users
-          $.each(data, function(index, value) {
-            button = create_button(index, value.screen_name, "btn", "follow btn success", "&check; Following");
-            items.push(button);
-          });
+      user_ids = user_ids.substring(0, user_ids.length-1);
+      var i, j, temparray, chunk = 50;
+      for (i = 0, j = user_ids.length; i < j; i+=chunk) {
+          temparray = array.slice(i, i+chunk);
+          console.log("Temp array: " + temparray);
+          request_2 = $.ajax({
+            url: twitter_api + "/users/lookup.json",
+            dataType: "jsonp",
+            data: {
+              user_id: temparray
+            },
+            success: function(data) {
 
-          // add to list and create click handlers for follow/unfollow actions
-          $('#friends').html(items.join(''));
-          $('.follow').click(function(event) {
-            id = $(this).attr('id');
-            type = $(this).attr('class');
-            if (type === "follow btn success") {
-              unfollow(id);
-            } else {
-              follow(id);
+              // create the follow/unfollow buttons for the returned users
+              $.each(data, function(index, value) {
+                button = create_button(index, value.screen_name, "btn", "follow btn success", "&check; Following");
+                console.log("Creating button: " + button);
+              });
+
+              // create click handlers for follow/unfollow actions
+              $('.follow').click(function(event) {
+                id = $(this).attr('id');
+                type = $(this).attr('class');
+                if (type === "follow btn success") {
+                  unfollow(id);
+                } else {
+                  follow(id);
+                }
+              });
+
+              // show only the first 20
+              $('.follow').parent().parent().hide();
+              if (items.length == num_following) {
+                  $('.follow').parent().parent().slice(0,show_per_page).show();
+              }
             }
           });
-
-          // show only the first 20
-          $('.follow').parent().parent().hide();
-          $('.follow').parent().parent().slice(0,show_per_page).show();
-        }
-      });
+      }
     }
   });
 });
@@ -225,8 +232,10 @@ function follow(id) {
 }
 
 function create_button(index, username, id, classname, text) {
-  actual_id = "" + id + index;
+  actual_id = "" + id + items.length;
   button = '<tr><td><span id="' + actual_id + '" class="label notice">@' + username + '</span></td><td><button id="' + actual_id + '" class="' + classname + '">' + text + '</button></td></tr>';
+  items.push(button);
+  $('#friends').append(button);
   return button;
 }
 
