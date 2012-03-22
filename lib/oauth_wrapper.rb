@@ -23,6 +23,7 @@ module OauthWrapper
 
     if follow_list
       follow_list = follow_list.split(",")
+      Rails.logger.error follow_list
       self.client.mass_follow(follow_list)
     end
   end
@@ -37,6 +38,7 @@ module OauthWrapper
 
     if unfollow_list
       unfollow_list = unfollow_list.split(",")
+      Rails.logger.error unfollow_list
       self.client.mass_unfollow(unfollow_list)
     end
     redirect_to root_path

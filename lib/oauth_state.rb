@@ -71,6 +71,7 @@ class OauthState
   def mass_follow(follow_list)
     follow_list.each do |to_follow|
       path = "/friendships/create.json?screen_name=#{to_follow}"
+      Rails.logger.error post(path)
     end
   end
 
@@ -78,6 +79,7 @@ class OauthState
   def mass_unfollow(unfollow_list)
     unfollow_list.each do |to_unfollow|
       path = "/friendships/destroy.json?screen_name=#{to_unfollow}"
+      Rails.logger.error post(path)
     end
   end
 end

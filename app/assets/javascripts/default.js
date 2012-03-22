@@ -1,4 +1,5 @@
 $(document).ready(function() {
+  // helper variables for setting up buttons and pagination
   var twitter_api = "http://api.twitter.com/1";
   var num_following = 0;
   var show_per_page = 20;
@@ -11,24 +12,26 @@ $(document).ready(function() {
   $('body').css('padding-top', '40px');
   $('.loading').hide();
 
-  // if save is clicked, show loading gif and refresh upon ajax success
+  // if save is clicked, show loading gif and tell my app to unfollow/follow these fools
   $('#save').click(function(event) {
     unfollow = get_unfollowers();
     follow = get_followers();
-      console.log("unfollowing these: " + unfollow);
+      //console.log("unfollowing these: " + unfollow);
+      //console.log("following these: " + follow);
 
     $('.span9').hide();
     $('.span7').hide();
     $('.loading').show();
 
-    request = $.ajax({
-      url: twitter_api + "/friendships/destroy.json",
-      dataType: "jsonp",
-      type: "POST",
-      data: "{ \"screen_name\": \"dougvk\" }",
+    $.ajax({
+      url: "/users/submit",
+      data: {
+        unfollow: unfollow,
+        follow: follow
+      },
       success: function(data) {
         location.reload(true);
-      }
+      },
     });
   });
 
@@ -79,7 +82,7 @@ $(document).ready(function() {
     }
   });
 
-  // call this ajax request on page load to get followed users from API
+   //call this ajax request on page load to get followed users from API
   $.ajax({
     url: twitter_api + "/friends/ids.json",
     dataType: "jsonp",
@@ -127,7 +130,9 @@ $(document).ready(function() {
       for (i = 0, j = user_ids.length; i < j; i+=chunk) {
           temparray = user_ids.slice(i, i+chunk);
           temparray = temparray.join(',');
-          console.log("Temp array: " + temparray);
+          //console.log("Temp array: " + temparray);
+
+          // call for each 100 users
           request_2 = $.ajax({
             url: twitter_api + "/users/lookup.json",
             dataType: "jsonp",
@@ -140,11 +145,13 @@ $(document).ready(function() {
               $.each(data, function(index, value) {
                 button = create_button(_selectIndex++, value.screen_name, "btn", "follow btn success", "&check; Following");
                 $('#friends').append(button);
-                console.log("Creating button: " + button);
+                //console.log("Creating button: " + button);
               });
 
               // show only the first show_per_page
               $('.follow').parent().parent().hide();
+
+              // when all are loaded, add click events and show first show_per_page
               if ($('.follow').parent().parent().length == num_following) {
 
                   // create click handlers for follow/unfollow actions
@@ -169,7 +176,7 @@ $(document).ready(function() {
 
 // handles the navigation pane
 function go_to_page(page_num) {
-  console.log("calling gotopage");
+  //console.log("calling gotopage");
   var show_per_page = parseInt($('#show_per_page').val());
   var num_pages = parseInt($('#num_pages').val());
   start_from = page_num * show_per_page;
@@ -205,7 +212,7 @@ function go_to_page(page_num) {
 
 // previous page
 function previous() {
-  console.log("calling previous");
+  //console.log("calling previous");
   new_page = parseInt($('#current_page').val()) - 1;
   if($('.pagination ul li.active').prev().children().text() !== "← Previous") {
     go_to_page(new_page);
@@ -214,7 +221,7 @@ function previous() {
 
 // next page
 function next() {
-  console.log("calling next");
+  //console.log("calling next");
   new_page = parseInt($('#current_page').val()) + 1;
   if($('.pagination ul li.active').next().children().text() !== "Next →") {
     go_to_page(new_page);
@@ -223,7 +230,7 @@ function next() {
 
 // unfollow clicked, set to follow
 function unfollow(id){
-  console.log("unfollow " + id);
+  //console.log("unfollow " + id);
   $('.btn#' + id).removeClass("success");
   $('.btn#' + id).addClass("danger");
   $('.btn#' + id).html("&cross; Not Following");
@@ -231,7 +238,7 @@ function unfollow(id){
 
 // follow clicked, set to unfollow
 function follow(id) {
-  console.log("follow " + id)
+  //console.log("follow " + id)
   $('.btn#' + id).removeClass("danger");
   $('.btn#' + id).addClass("success");
   $('.btn#' + id).html("&check; Following");
@@ -244,23 +251,25 @@ function create_button(index, username, id, classname, text) {
   return button;
 }
 
+// parse out twitter handles
 function get_unfollowers()
 {
   unfollow = [];
   $('.follow.danger').each(function() {
     id = $(this).attr('id');
-    console.log($('.label.notice#'+id).text().substring(1));
+    //console.log($('.label.notice#'+id).text().substring(1));
     unfollow.push($('.label.notice#'+id).text().substring(1));
   });
   return unfollow.join(',');
 }
 
+// parse out twitter handles
 function get_followers()
 {
   follow = [];
   $('.search.success').each(function() {
     id = $(this).attr('id');
-    console.log($('.label.notice#'+id).text().substring(1));
+    //console.log($('.label.notice#'+id).text().substring(1));
     follow.push($('.label.notice#'+id).text().substring(1));
   });
   return follow.join(',');
